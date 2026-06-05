@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Папе с любовью ❤️</title>
+    <title>Тоиру с любовью ❤️</title>
     <style>
         * {
             margin: 0;
@@ -148,7 +148,6 @@
             position: fixed;
             width: 10px;
             height: 10px;
-            background: #ff0000;
             position: absolute;
             animation: confettiFall 3s linear forwards;
             z-index: 999;
@@ -171,22 +170,22 @@
 
     <div class="card">
         <div class="icon">👨‍👧‍👦</div>
-        <h1>С днём рождения, Папа! 🎉</h1>
+        <h1>Тоир, для тебя! 💫</h1>
         
         <div class="message">
-            Ты — моя опора и пример для подражания. <br>
-            Спасибо за всё, что ты для меня делаешь.
+            Ты — самый лучший папа на свете.<br>
+            Спасибо тебе за всё, что ты делаешь для меня.
         </div>
         
         <div class="highlight">
-            "Лучший папа в мире — это ты. <br>
-            Я очень тебя люблю! 💖"
+            "Я тебя очень сильно люблю! 💖<br>
+            Ты — моя гордость и опора."
         </div>
         
-        <button id="surpriseBtn">🎁 Нажми для сюрприза 🎁</button>
+        <button id="surpriseBtn">🎁 Нажми сюда 🎁</button>
         
         <div class="footer">
-            С любовью, твой(а) сын/дочь ❤️
+            С любовью, твой ребёнок ❤️
         </div>
     </div>
 
@@ -194,7 +193,7 @@
         // Фоновые сердечки
         function createFloatingHearts() {
             const container = document.getElementById('floatingHearts');
-            const hearts = ['❤️', '💖', '💗', '💓', '💕', '💝', '🎈', '🎉'];
+            const hearts = ['❤️', '💖', '💗', '💓', '💕', '💝', '🎈', '✨'];
             
             for (let i = 0; i < 30; i++) {
                 const heart = document.createElement('i');
@@ -232,22 +231,19 @@
             createConfetti();
             
             const messages = [
-                "🎉 Папа, ты лучший! 🎉",
-                "💖 Спасибо за всё, что ты делаешь 💖",
-                "👨‍👧‍👦 Ты моя гордость и опора 👨‍👧‍👦",
-                "🏆 Лучший отец в мире! 🏆",
-                "✨ Ты всегда рядом, когда нужен ✨"
+                "🎉 Тоир, ты лучший! 🎉",
+                "💖 Спасибо за всё, папа 💖",
+                "👨‍👧‍👦 Я тебя очень люблю! 👨‍👧‍👦",
+                "🏆 Ты — моя гордость! 🏆",
+                "✨ Ты всегда в моём сердце ✨"
             ];
             
             const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-            
-            // Всплывающее окно с сердечками
             alert(randomMsg);
         }
 
         createFloatingHearts();
-        
         document.getElementById('surpriseBtn').onclick = showLove;
     </script>
 </body>
-</html>
+</html>ы
