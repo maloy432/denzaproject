@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Погода — поиск по городу</title>
+    <title>Погода в мире — реальная</title>
     <style>
         * {
             margin: 0;
@@ -139,13 +139,18 @@
             font-weight: bold;
             padding: 15px;
         }
+
+        .loading {
+            color: #2a5298;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="weather-card">
         <h1>🌤️ Погода в мире</h1>
         <div class="search-box">
-            <input type="text" id="cityInput" placeholder="Введите город (например, Узбекистан, Германия)">
+            <input type="text" id="cityInput" placeholder="Введите город (например, Лондон, Токио, Ташкент)">
             <button id="searchBtn">🔍 Найти</button>
         </div>
         <div id="weatherResult" class="weather-result">
@@ -154,63 +159,67 @@
     </div>
 
     <script>
-        // Демо-база данных погоды
-        const weatherDB = {
-            "узбекистан": { temp: 35, feelsLike: 33, desc: "☀️ Солнечно", humidity: 25, wind: 3 },
-            "ташкент": { temp: 36, feelsLike: 34, desc: "☀️ Ясно", humidity: 22, wind: 2 },
-            "германия": { temp: 18, feelsLike: 16, desc: "☁️ Облачно", humidity: 65, wind: 8 },
-            "берлин": { temp: 17, feelsLike: 15, desc: "☁️ Облачно", humidity: 68, wind: 7 },
-            "россия": { temp: 12, feelsLike: 9, desc: "🌧️ Дождливо", humidity: 80, wind: 10 },
-            "москва": { temp: 11, feelsLike: 8, desc: "🌧️ Дождь", humidity: 82, wind: 9 },
-            "сша": { temp: 24, feelsLike: 22, desc: "🌤️ Переменная облачность", humidity: 50, wind: 5 },
-            "франция": { temp: 20, feelsLike: 18, desc: "🌤️ Солнечно", humidity: 55, wind: 4 },
-            "париж": { temp: 19, feelsLike: 17, desc: "🌤️ Ясно", humidity: 58, wind: 4 },
-            "япония": { temp: 22, feelsLike: 20, desc: "🌸 Вишня цветёт", humidity: 60, wind: 4 },
-            "англия": { temp: 15, feelsLike: 13, desc: "🌫️ Туманно", humidity: 75, wind: 6 },
-            "лондон": { temp: 14, feelsLike: 12, desc: "🌫️ Туман", humidity: 78, wind: 7 }
-        };
+        // API ключ OpenWeatherMap
+        const API_KEY = "37a573d5229273cbe7113f383bbce331";
 
         const cityInput = document.getElementById("cityInput");
         const searchBtn = document.getElementById("searchBtn");
         const weatherResult = document.getElementById("weatherResult");
 
-        function getWeather() {
-            let city = cityInput.value.trim().toLowerCase();
+        async function getWeather() {
+            const city = cityInput.value.trim();
             if (!city) {
-                weatherResult.innerHTML = '<p class="error">🌍 Введите город!</p>';
+                weatherResult.innerHTML = '<p class="error">🌍 Введите название города!</p>';
                 return;
             }
 
-            let weather = weatherDB[city];
-            if (!weather) {
-                for (const [key, value] of Object.entries(weatherDB)) {
-                    if (key.includes(city) || city.includes(key)) {
-                        weather = value;
-                        break;
+            weatherResult.innerHTML = '<p class="loading">⏳ Загрузка погоды...</p>';
+
+            try {
+                const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric&lang=ru`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error("Город не найден");
+                    } else {
+                        throw new Error("Ошибка сервера. Попробуйте позже");
                     }
                 }
-            }
+                
+                const data = await response.json();
+                
+                const cityName = data.name;
+                const country = data.sys.country;
+                const temp = Math.round(data.main.temp);
+                const feelsLike = Math.round(data.main.feels_like);
+                const description = data.weather[0].description;
+                const humidity = data.main.humidity;
+                const windSpeed = data.wind.speed;
+                const iconCode = data.weather[0].icon;
+                const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
 
-            if (!weather) {
-                weatherResult.innerHTML = `<p class="error">❌ Город "${cityInput.value}" не найден</p>`;
-                return;
+                weatherResult.innerHTML = `
+                    <div class="city-name">${cityName}, ${country}</div>
+                    <img src="${iconUrl}" alt="${description}" style="width: 80px; margin: 10px auto;">
+                    <div class="temp">${temp}°C</div>
+                    <div class="description">${description}</div>
+                    <div class="details">
+                        <div class="detail-item">🌡️ Ощущается: ${feelsLike}°C</div>
+                        <div class="detail-item">💧 Влажность: ${humidity}%</div>
+                        <div class="detail-item">💨 Ветер: ${windSpeed} м/с</div>
+                    </div>
+                `;
+            } catch (error) {
+                weatherResult.innerHTML = `<p class="error">❌ ${error.message}</p>`;
             }
-
-            weatherResult.innerHTML = `
-                <div class="city-name">${cityInput.value.toUpperCase()}</div>
-                <div class="temp">${weather.temp}°C</div>
-                <div class="description">${weather.desc}</div>
-                <div class="details">
-                    <div class="detail-item">🌡️ Ощущается: ${weather.feelsLike}°C</div>
-                    <div class="detail-item">💧 Влажность: ${weather.humidity}%</div>
-                    <div class="detail-item">💨 Ветер: ${weather.wind} м/с</div>
-                </div>
-            `;
         }
 
         searchBtn.addEventListener("click", getWeather);
         cityInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") getWeather();
+            if (e.key === "Enter") {
+                getWeather();
+            }
         });
     </script>
 </body>
