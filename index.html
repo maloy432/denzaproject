@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Погода — реальная</title>
+    <title>Погода в мире</title>
     <style>
         * {
             margin: 0;
@@ -112,13 +112,17 @@
             color: #d32f2f;
             font-weight: bold;
         }
+
+        .loading {
+            color: #2a5298;
+        }
     </style>
 </head>
 <body>
     <div class="weather-card">
         <h1>🌤️ Погода в мире</h1>
         <div class="search-box">
-            <input type="text" id="cityInput" placeholder="Введите город (например, Ташкент, Лондон)">
+            <input type="text" id="cityInput" placeholder="Введите город (например, Лондон, Ташкент)">
             <button id="searchBtn">🔍 Найти</button>
         </div>
         <div id="weatherResult" class="weather-result">
@@ -136,15 +140,18 @@
         async function getWeather() {
             const city = cityInput.value.trim();
             if (!city) {
-                weatherResult.innerHTML = '<p class="error">🌍 Введите город!</p>';
+                weatherResult.innerHTML = '<p class="error">🌍 Введите название города!</p>';
                 return;
             }
 
-            weatherResult.innerHTML = '<p>⏳ Загрузка...</p>';
+            weatherResult.innerHTML = '<p class="loading">⏳ Загрузка погоды...</p>';
 
             try {
-                const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric&lang=ru`;
-                const response = await fetch(url);
+                // Используем прокси для обхода CORS
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric&lang=ru`;
+                
+                const response = await fetch(proxyUrl + apiUrl);
                 
                 if (!response.ok) {
                     throw new Error("Город не найден");
