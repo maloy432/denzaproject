@@ -5,124 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Погода в мире</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .weather-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 40px;
-            padding: 40px 30px;
-            text-align: center;
-            max-width: 550px;
-            width: 100%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            font-size: 2.2em;
-            color: #1e3c72;
-            margin-bottom: 25px;
-        }
-
-        .search-box {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        #cityInput {
-            flex: 1;
-            min-width: 200px;
-            padding: 14px 20px;
-            font-size: 1em;
-            border: 2px solid #ddd;
-            border-radius: 50px;
-            outline: none;
-        }
-
-        #searchBtn {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            font-size: 1em;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .weather-result {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f0f4ff;
-            border-radius: 30px;
-        }
-
-        .city-name {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #1e3c72;
-        }
-
-        .temp {
-            font-size: 3em;
-            font-weight: bold;
-            color: #2a5298;
-            margin: 10px 0;
-        }
-
-        .description {
-            font-size: 1.2em;
-            color: #555;
-            text-transform: capitalize;
-        }
-
-        .details {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .detail-item {
-            background: white;
-            padding: 10px 15px;
-            border-radius: 20px;
-            flex: 1;
-            min-width: 80px;
-        }
-
-        .error {
-            color: #d32f2f;
-            font-weight: bold;
-        }
-
-        .loading {
-            color: #2a5298;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{min-height:100vh;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%);font-family:'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;padding:20px}
+        .weather-card{background:rgba(255,255,255,0.95);border-radius:40px;padding:40px 30px;text-align:center;max-width:550px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,0.3)}
+        h1{font-size:2.2em;color:#1e3c72;margin-bottom:25px}
+        .search-box{display:flex;gap:12px;margin-bottom:30px;flex-wrap:wrap;justify-content:center}
+        #cityInput{flex:1;min-width:200px;padding:14px 20px;font-size:1em;border:2px solid #ddd;border-radius:50px;outline:none}
+        #searchBtn{background:linear-gradient(135deg,#1e3c72,#2a5298);color:white;border:none;padding:14px 28px;font-size:1em;border-radius:50px;cursor:pointer;font-weight:bold}
+        .weather-result{margin-top:20px;padding:20px;background:#f0f4ff;border-radius:30px}
+        .city-name{font-size:1.8em;font-weight:bold;color:#1e3c72}
+        .temp{font-size:3em;font-weight:bold;color:#2a5298;margin:10px 0}
+        .description{font-size:1.2em;color:#555;text-transform:capitalize}
+        .details{display:flex;justify-content:space-between;gap:15px;margin-top:20px;flex-wrap:wrap}
+        .detail-item{background:white;padding:10px 15px;border-radius:20px;flex:1;min-width:80px}
+        .error{color:#d32f2f;font-weight:bold}
+        .loading{color:#2a5298}
     </style>
 </head>
 <body>
     <div class="weather-card">
         <h1>🌤️ Погода в мире</h1>
         <div class="search-box">
-            <input type="text" id="cityInput" placeholder="Введите город (например, Лондон, Ташкент)">
+            <input type="text" id="cityInput" placeholder="Введите город (Ташкент, Лондон, Москва)">
             <button id="searchBtn">🔍 Найти</button>
         </div>
         <div id="weatherResult" class="weather-result">
@@ -133,31 +37,41 @@
     <script>
         const API_KEY = "37a573d5229273cbe7113f383bbce331";
 
+        const cityTranslations = {
+            "ташкент": "Tashkent", "москва": "Moscow", "лондон": "London",
+            "нью-йорк": "New York", "берлин": "Berlin", "париж": "Paris",
+            "токио": "Tokyo", "пекин": "Beijing", "рим": "Rome",
+            "мадрид": "Madrid", "дубай": "Dubai", "стамбул": "Istanbul",
+            "киев": "Kyiv", "минск": "Minsk", "астана": "Astana",
+            "бишкек": "Bishkek", "душанбе": "Dushanbe", "баку": "Baku",
+            "самарканд": "Samarkand", "бухара": "Bukhara"
+        };
+
         const cityInput = document.getElementById("cityInput");
         const searchBtn = document.getElementById("searchBtn");
         const weatherResult = document.getElementById("weatherResult");
 
         async function getWeather() {
-            const city = cityInput.value.trim();
+            let city = cityInput.value.trim();
             if (!city) {
                 weatherResult.innerHTML = '<p class="error">🌍 Введите название города!</p>';
                 return;
             }
 
+            const englishCity = cityTranslations[city.toLowerCase()] || city;
+            
             weatherResult.innerHTML = '<p class="loading">⏳ Загрузка погоды...</p>';
 
             try {
-                // Используем прокси для обхода CORS
-                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-                const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric&lang=ru`;
+                const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(englishCity)}&appid=${API_KEY}&units=metric&lang=ru`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
                 
-                const response = await fetch(proxyUrl + apiUrl);
-                
-                if (!response.ok) {
-                    throw new Error("Город не найден");
-                }
-                
+                const response = await fetch(proxyUrl);
                 const data = await response.json();
+                
+                if (data.cod === "404" || !data.main) {
+                    throw new Error(`Город "${city}" не найден`);
+                }
                 
                 weatherResult.innerHTML = `
                     <div class="city-name">${data.name}, ${data.sys.country}</div>
