@@ -1,13 +1,217 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Привет Нигора</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Погода — поиск по городу</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .weather-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 40px;
+            padding: 40px 30px;
+            text-align: center;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+        }
+
+        .weather-card:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            font-size: 2.2em;
+            color: #1e3c72;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #cityInput {
+            flex: 1;
+            min-width: 200px;
+            padding: 14px 20px;
+            font-size: 1em;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        #cityInput:focus {
+            border-color: #2a5298;
+            box-shadow: 0 0 8px rgba(42, 82, 152, 0.3);
+        }
+
+        #searchBtn {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        #searchBtn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .weather-result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .city-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .temp {
+            font-size: 3em;
+            font-weight: bold;
+            color: #2a5298;
+            margin: 10px 0;
+        }
+
+        .description {
+            font-size: 1.2em;
+            color: #555;
+            text-transform: capitalize;
+            margin: 10px 0;
+        }
+
+        .details {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            flex: 1;
+            min-width: 80px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .error {
+            color: #d32f2f;
+            font-weight: bold;
+            padding: 15px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Нигора привет!</h1>
+    <div class="weather-card">
+        <h1>🌤️ Погода в мире</h1>
+        <div class="search-box">
+            <input type="text" id="cityInput" placeholder="Введите город (например, Узбекистан, Германия)">
+            <button id="searchBtn">🔍 Найти</button>
+        </div>
+        <div id="weatherResult" class="weather-result">
+            <p>Введите город и нажмите "Найти"</p>
+        </div>
+    </div>
 
     <script>
-        alert("Нигора, привет!");
+        // Демо-база данных погоды
+        const weatherDB = {
+            "узбекистан": { temp: 35, feelsLike: 33, desc: "☀️ Солнечно", humidity: 25, wind: 3 },
+            "ташкент": { temp: 36, feelsLike: 34, desc: "☀️ Ясно", humidity: 22, wind: 2 },
+            "германия": { temp: 18, feelsLike: 16, desc: "☁️ Облачно", humidity: 65, wind: 8 },
+            "берлин": { temp: 17, feelsLike: 15, desc: "☁️ Облачно", humidity: 68, wind: 7 },
+            "россия": { temp: 12, feelsLike: 9, desc: "🌧️ Дождливо", humidity: 80, wind: 10 },
+            "москва": { temp: 11, feelsLike: 8, desc: "🌧️ Дождь", humidity: 82, wind: 9 },
+            "сша": { temp: 24, feelsLike: 22, desc: "🌤️ Переменная облачность", humidity: 50, wind: 5 },
+            "франция": { temp: 20, feelsLike: 18, desc: "🌤️ Солнечно", humidity: 55, wind: 4 },
+            "париж": { temp: 19, feelsLike: 17, desc: "🌤️ Ясно", humidity: 58, wind: 4 },
+            "япония": { temp: 22, feelsLike: 20, desc: "🌸 Вишня цветёт", humidity: 60, wind: 4 },
+            "англия": { temp: 15, feelsLike: 13, desc: "🌫️ Туманно", humidity: 75, wind: 6 },
+            "лондон": { temp: 14, feelsLike: 12, desc: "🌫️ Туман", humidity: 78, wind: 7 }
+        };
+
+        const cityInput = document.getElementById("cityInput");
+        const searchBtn = document.getElementById("searchBtn");
+        const weatherResult = document.getElementById("weatherResult");
+
+        function getWeather() {
+            let city = cityInput.value.trim().toLowerCase();
+            if (!city) {
+                weatherResult.innerHTML = '<p class="error">🌍 Введите город!</p>';
+                return;
+            }
+
+            let weather = weatherDB[city];
+            if (!weather) {
+                for (const [key, value] of Object.entries(weatherDB)) {
+                    if (key.includes(city) || city.includes(key)) {
+                        weather = value;
+                        break;
+                    }
+                }
+            }
+
+            if (!weather) {
+                weatherResult.innerHTML = `<p class="error">❌ Город "${cityInput.value}" не найден</p>`;
+                return;
+            }
+
+            weatherResult.innerHTML = `
+                <div class="city-name">${cityInput.value.toUpperCase()}</div>
+                <div class="temp">${weather.temp}°C</div>
+                <div class="description">${weather.desc}</div>
+                <div class="details">
+                    <div class="detail-item">🌡️ Ощущается: ${weather.feelsLike}°C</div>
+                    <div class="detail-item">💧 Влажность: ${weather.humidity}%</div>
+                    <div class="detail-item">💨 Ветер: ${weather.wind} м/с</div>
+                </div>
+            `;
+        }
+
+        searchBtn.addEventListener("click", getWeather);
+        cityInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") getWeather();
+        });
     </script>
 </body>
 </html>
